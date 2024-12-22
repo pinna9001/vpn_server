@@ -1,0 +1,26 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - wireguard-tools
+write_files:
+  - path: /etc/wireguard/wg0.conf
+    permissions: '0600'
+    content: |
+      [Interface]
+      PrivateKey = <server_private_key>
+      Address = 10.0.0.1/24
+      SaveConfig = true
+      ListenPort = 12345
+      PreUp = sysctl -w net.ipv4.ip_forward=1
+
+      [Peer]
+      PublicKey = <rpi_public_key>
+      AllowedIPs = 10.0.0.2/32
+
+      [Peer]
+      PublicKey = <client1_public_key>
+      AllowedIPs = 10.0.0.3/32
+runcmd:
+  - apt-get install wireguard-tools
+  - wg-quick up wg0
