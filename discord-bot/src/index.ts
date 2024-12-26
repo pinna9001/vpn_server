@@ -18,7 +18,7 @@ client.once(Events.ClientReady, readyClient => {
 	}); 
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(DISCORD_TOKEN);
 
 const commands = [
 	{
@@ -69,13 +69,13 @@ commands.forEach(command => {
 });
 const commandsData = Object.values(commands).map((command) => command.data);
 
-const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+const rest = new REST().setToken(DISCORD_TOKEN);
 (async () => {
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
 		const data = await rest.put(
-			Routes.applicationCommands(process.env.DISCORD_CLIENT_ID),
+			Routes.applicationCommands(DISCORD_CLIENT_ID),
 			{ body: commandsData },
 		);
 
