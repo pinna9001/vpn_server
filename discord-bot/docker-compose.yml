@@ -1,0 +1,6 @@
+services:
+  discord-bot:
+    container_name: vpn_discord_bot
+    build: .
+    env_file:
+      - .env
