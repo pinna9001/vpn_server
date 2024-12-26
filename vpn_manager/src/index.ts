@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import fs from "fs";
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
@@ -18,8 +18,9 @@ if (!TERRAFORM_DIRECTORY) {
 
 app.get("/start", (req: Request, res: Response) => {
 	console.log("Starting VPN server...")
-	execSync("terraform apply -auto-approve", { cwd: TERRAFORM_DIRECTORY })
-	execSync("wg-quick up wg0");
+	exec("terraform apply -auto-approve", { cwd: TERRAFORM_DIRECTORY })
+	execSync("systemctl enable wg-quick@wg0");
+	execSync("systemctl start wg-quick@wg0");
 	fs.writeFile("vpn_running", "", (err) => {});
 	console.log("VPN server started.")
 	res.status(200);
@@ -27,8 +28,9 @@ app.get("/start", (req: Request, res: Response) => {
 
 app.get("/stop", (req: Request, res: Response) => {
 	console.log("Stopping VPN server...")
-	execSync("wg-quick down wg0");
-	execSync("terraform destroy -auto-approve", { cwd: TERRAFORM_DIRECTORY })
+	execSync("systemctl stop wg-quick@wg0");
+	execSync("systemctl disable wg-quick@wg0");
+	exec("terraform destroy -auto-approve", { cwd: TERRAFORM_DIRECTORY })
 	fs.unlink("vpn_running", (err) => {});
 	console.log("VPN server stopped.")
 	res.status(200);
