@@ -15,7 +15,7 @@ WORKDIR /app
 
 COPY ./package* /app/
 
-RUN npm install 
+RUN npm install --omit=dev
 COPY --from=builder /app/dist/ /app/dist/
 
 ENTRYPOINT ["npm", "run", "start"]

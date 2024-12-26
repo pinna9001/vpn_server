@@ -1,0 +1,16 @@
+[Unit]
+Description=VPN Management through Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/path/to/vpn-server/vpn_manager/
+ExecStart=/usr/bin/node /path/to/vpn-server/vpn_manager/dist/index.js
+Restart=on-failure
+RestartSec=10
+
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

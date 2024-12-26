@@ -1,6 +1,7 @@
 import { REST, Routes, Client, Events, SlashCommandBuilder, GatewayIntentBits, Collection, CommandInteraction } from "discord.js";
 
 import fetch from "node-fetch";
+import EventEmitter, {EventEmitter} from "events"
 
 const { DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_USER_ID, VPN_MANAGEMENT_SERVER } = process.env;
 
@@ -20,18 +21,45 @@ client.once(Events.ClientReady, readyClient => {
 
 client.login(DISCORD_TOKEN);
 
+const event_emitter = new EventEmitter();
+
+async function start_vpn() {
+	const response = await fetch(VPN_MANAGEMENT_SERVER + "/start");
+	if (response.status === 200) {	
+		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
+			user.send("VPN Server ready");
+		}); 
+	} else {
+		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
+			user.send("VPN Server not started");
+		}); 
+	}
+}
+
+async function stop_vpn() {
+	const response = await fetch(VPN_MANAGEMENT_SERVER + "/stop");
+	if (response.status === 200) {	
+		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
+			user.send("VPN Server destroyed");
+		}); 
+	} else {
+		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
+			user.send("VPN Server not stopped");
+		});
+	}
+}
+
+event_emitter.on("start_vpn", start_vpn);
+event_emitter.on("stop_vpn", stop_vpn);
+
 const commands = [
 	{
 		data: new SlashCommandBuilder()
 			.setName("start")
 			.setDescription("Start VPN Server"),
 		async execute(interaction: CommandInteraction) {
-			const response = await fetch(VPN_MANAGEMENT_SERVER + "/start")
-			if (response.status === 200) {	
-				return interaction.reply("Started VPN Server")
-			} else {
-				return interaction.reply("Couldn't start VPN server")
-			}
+			event_emitter.emit("start_vpn");
+			await interaction.reply("Starting VPN Server");
 		}
 	},
 	{
@@ -39,12 +67,8 @@ const commands = [
 			.setName("stop")
 			.setDescription("Stop VPN Server"),
 		async execute(interaction: CommandInteraction) {
-			const response = await fetch(VPN_MANAGEMENT_SERVER + "/stop")
-			if (response.status === 200) {	
-				return interaction.reply("Stopped VPN Server")
-			} else {
-				return interaction.reply("Couldn't stop VPN server")
-			}
+			event_emitter.emit("stop_vpn");
+			await interaction.reply("Stopping VPN Server");
 		}
 	},
 	{
@@ -55,9 +79,9 @@ const commands = [
 			const response = await fetch(VPN_MANAGEMENT_SERVER + "/status")
 			if (response.status === 200) {	
 				const data = await response.json();
-				return interaction.reply(data)
+				await interaction.reply(data)
 			} else {
-				return interaction.reply("Couldn't get VPN server status.")
+				await interaction.reply("Couldn't get VPN server status.")
 			}
 		}	
 	}
