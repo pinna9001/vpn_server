@@ -1,7 +1,7 @@
 import { REST, Routes, Client, Events, SlashCommandBuilder, GatewayIntentBits, Collection, CommandInteraction } from "discord.js";
 
 import fetch from "node-fetch";
-import EventEmitter, {EventEmitter} from "events"
+import EventEmitter from "events"
 
 const { DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_USER_ID, VPN_MANAGEMENT_SERVER } = process.env;
 
@@ -10,6 +10,7 @@ if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID || !DISCORD_USER_ID || !VPN_MANAGEMENT_
 }
 
 const client = new Client({ intents: 8 });
+let locked = false;
 
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`)
@@ -24,6 +25,13 @@ client.login(DISCORD_TOKEN);
 const event_emitter = new EventEmitter();
 
 async function start_vpn() {
+	if (locked) {
+		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
+			user.send("Other Operation currently running.");
+		}); 
+		return;
+	}
+	locked = true;
 	const response = await fetch(VPN_MANAGEMENT_SERVER + "/start");
 	if (response.status === 200) {	
 		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
@@ -34,9 +42,17 @@ async function start_vpn() {
 			user.send("VPN Server not started");
 		}); 
 	}
+	locked = false;
 }
 
 async function stop_vpn() {
+	if (locked) {
+		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
+			user.send("Other Operation currently running.");
+		}); 
+		return;
+	}
+	locked = true;
 	const response = await fetch(VPN_MANAGEMENT_SERVER + "/stop");
 	if (response.status === 200) {	
 		client.users.fetch(DISCORD_USER_ID).then((user) =>  {
@@ -47,6 +63,7 @@ async function stop_vpn() {
 			user.send("VPN Server not stopped");
 		});
 	}
+	locked = false;
 }
 
 event_emitter.on("start_vpn", start_vpn);
