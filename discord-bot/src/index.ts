@@ -129,6 +129,10 @@ const rest = new REST().setToken(DISCORD_TOKEN);
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	
+	if (interaction.user.id != DISCORD_USER_ID) {
+		interaction.reply("Unknown user. Ignoring Command.")
+	}
+
 	const command = commandMap.get(interaction.commandName);
 	
 	if (!command) {
