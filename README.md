@@ -55,8 +55,8 @@ If you need ssh access to the created server, there is an file (ssh.key) with th
 
 ### Discord Bot
 
-[Discord Bot Usage](./discord-bot/README.md#Usage)
+[Discord Bot](./discord-bot/README.md)
 
 ### VPN Manager
 
-[VPN Manager Usage](./vpn_manager/README.md#Usage)
+[VPN Manager](./vpn_manager/README.md)
