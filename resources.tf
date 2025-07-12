@@ -38,6 +38,7 @@ resource "hcloud_server" "vpn_server" {
 	name = "vpn-server"
 	image = "ubuntu-22.04"
 	server_type = "cx22"
+	location = "fsn1"
 	public_net {
 		ipv4_enabled = false
 		ipv6_enabled = true
